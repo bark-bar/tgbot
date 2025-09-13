@@ -1,11 +1,12 @@
 import aiogram
 import asyncio
 
+import os
 
 from aiogram import Bot, Dispatcher, types
 from aiogram.filters import Command
 
-bot = Bot(token='Something went wrong...')
+bot = Bot(token=os.environ["TOKEN_OF_BOT"])
 dp = Dispatcher()
 
 @dp.message(Command('start'))
