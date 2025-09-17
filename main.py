@@ -5,9 +5,6 @@ import os
 
 from app.handlers import router
 
-import os
-
-
 from aiogram import Bot, Dispatcher, types
 from aiogram.filters import Command
 

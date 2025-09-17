@@ -1,0 +1,14 @@
+ create database and write this on your PostgreSql Server(pgadmin4) in Query Tool:
+ 'CREATE TABLE Users(
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER UNIQUE,
+    username TEXT
+ );
+ CREATE TABLE Spends(
+    amount INTEGER,
+    user_id INTEGER,
+    currency TEXT,
+    create_date DATE,
+    description TEXT,
+    FOREIGN KEY(user_id) REFERENCES Users(user_id)
+ )'
