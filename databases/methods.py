@@ -33,5 +33,19 @@ class DatabaseHolder():
             print(f'failed to connect:{e}')
             await tr.rollback()
         await conn.close()
-    async def delete_expense(self):
-        pass
+    async def delete_expense(self,user_id,expense_number):
+        conn = await asyncpg.connect(user='postgres',password='31591',host='localhost',database='usersandother')
+        tr = conn.transaction()
+        try:
+            await tr.start()
+            await conn.execute('DELETE FROM spends as s  USING numberedspends as n  WHERE s.user_id = $1 AND n.user_id = $1 AND n.number_of_expense = $2',user_id,expense_number)
+            await tr.commit()
+        except Exception as e:
+            print(f'failed:{e}')
+            await tr.rollback()
+        await conn.close()
+    async def get_user_expenses(self,user_id):
+        conn = await asyncpg.connect(user='postgres',password='31591',host='localhost',database='usersandother')
+        data = await conn.fetch('SELECT description,create_date,number_of_expense FROM numberedspends where user_id = $1',user_id)
+        await conn.close()
+        return [tuple(record) for record in data]
