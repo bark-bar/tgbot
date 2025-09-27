@@ -2,14 +2,16 @@ import aiogram
 import asyncio
 import os
 
-import os
-
 from app.handlers import router
+
+from dotenv import load_dotenv
 
 from aiogram import Bot, Dispatcher, types
 from aiogram.filters import Command
 
-bot = Bot(token=os.environ["TOKEN_OF_BOT"])
+load_dotenv()
+
+bot = Bot(token=os.environ['TOKEN_OF_BOT'])
 dp = Dispatcher()
 
 async def main():
