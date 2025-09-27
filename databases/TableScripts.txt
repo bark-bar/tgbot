@@ -10,6 +10,7 @@
     currency TEXT,
     create_date DATE,
     description TEXT,
+    spend_id SERIAL PRIMARY KEY,
     FOREIGN KEY(user_id) REFERENCES Users(user_id)
  );
    CREATE VIEW numberedspends AS

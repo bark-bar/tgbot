@@ -1,4 +1,5 @@
 import asyncpg
+from datetime import date,timedelta
 import asyncio
 
 
@@ -11,7 +12,8 @@ class DatabaseHolder():
             await tr.start()
             await conn.execute('INSERT INTO users(user_id,username) VALUES($1,$2)',user_id,username)
             await tr.commit()
-        except:
+        except Exception as e:
+            print(f'failed:{e}')
             await tr.rollback()
         await conn.close()
 
@@ -42,9 +44,10 @@ class DatabaseHolder():
         tr = conn.transaction()
         try:
             await tr.start()
-            await conn.execute('DELETE FROM spends as s  USING numberedspends as n  WHERE s.user_id = $1 AND n.user_id = $1 AND n.number_of_expense = $2',user_id,expense_number)
+            await conn.execute('DELETE FROM spends as s WHERE user_id = $1 and spend_id in ( SELECT spend_id FROM numberedspends  WHERE user_id = $1  AND number_of_expense = $2)',user_id,expense_number)
             await tr.commit()
         except Exception as e:
+            print(f'failed: {e}')
             await tr.rollback()
         await conn.close()
         
@@ -65,3 +68,16 @@ class DatabaseHolder():
             print(f'failed:{e}')
             await tr.rollback()
         await conn.close()
+    async def get_history(self,user_id):
+        conn = await asyncpg.connect(user='postgres',password='31591',host='localhost',database='usersandother')
+        tr = conn.transaction()
+        try:
+            await tr.start()
+            await conn.execute('DELETE FROM actions where action_date < $1',date.today()-timedelta(days=7))
+            history = await conn.fetch('SELECT * from actions where user_id = $1',user_id)
+            await tr.commit()
+        except Exception as e:
+            print(f'failed{e}')
+            await tr.rollback()
+            return None
+        return [tuple(record) for record in history]

@@ -38,14 +38,15 @@ data_for_expenses = []
 
 @router.callback_query(F.data=='return-to-menu')
 async def menu(query:CallbackQuery):
+
     await query.message.edit_reply_markup(reply_markup=None)
-    kb = ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text='add-expense'),KeyboardButton(text='delete-expense')],[KeyboardButton(text='delete-all-expenses'),KeyboardButton(text='get-my-expenses')]],resize_keyboard=True)
+    kb = ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text='add-expense'),KeyboardButton(text='delete-expense')],[KeyboardButton(text='delete-all-expenses'),KeyboardButton(text='get-my-expenses'),KeyboardButton(text='history')]],resize_keyboard=True)
     await query.message.answer('Here s the menu',reply_markup=kb)
     
     
 @router.message(Command('start'))
 async def start(message: Message):
-    kb = ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text='add-expense'),KeyboardButton(text='delete-expense')],[KeyboardButton(text='delete-all-expenses'),KeyboardButton(text='get-my-expenses')]],resize_keyboard=True)
+    kb = ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text='add-expense'),KeyboardButton(text='delete-expense')],[KeyboardButton(text='delete-all-expenses'),KeyboardButton(text='get-my-expenses'),KeyboardButton(text='history')]],resize_keyboard=True)
     await db.add_user(message.from_user.id,message.from_user.username)
     return message.answer("Welcome to the tracker of expenses! You can add,delete your expenses and soon will be more functions!\nHope you enjoy it!",reply_markup=kb)
 
@@ -141,7 +142,24 @@ async def delete_all_expenses(message:Message,state:FSMContext):
 async def delete_all_commit(query:CallbackQuery,state:FSMContext):
     await query.message.edit_text('successfully deleted',reply_markup=returnkb)
     await db.delete_all_expenses(query.from_user.id)
-
+@router.message(F.text == 'history')
+async def get_history(message:Message):
+    user_history =  await db.get_history(message.from_user.id)
+    if user_history is None:
+        await message.answer('something went wrong')
+        return
+    if len(user_history) == 0:
+        await message.answer('you havent done any actions right now')
+        return
+    answer = ''
+    for data in user_history:
+        try:
+            answer += str(data[0]) + ' ' + data[2].strftime('%Y-%m-%d') +' '+ str(data[3]) +' '+ str(data[4])+' '+str(data[5]) + '\n'
+        except Exception as e:
+            print(f'failed:{e}')
+            
+    answer += 'Here is all your history'
+    await message.answer(answer,reply_markup=returnkb)
 
 
 @router.message(F.text=='get-my-expenses')
