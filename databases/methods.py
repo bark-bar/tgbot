@@ -1,7 +1,10 @@
 import asyncpg
 import asyncio
+
+
 class DatabaseHolder():
     async def add_user(self,user_id,username):
+        
         conn = await asyncpg.connect(user='postgres',password='31591',host='localhost',database='usersandother')
         tr = conn.transaction()
         try:
@@ -22,6 +25,7 @@ class DatabaseHolder():
         except:
             await tr.rollback()
         await conn.close()
+        
     async def add_expense(self,amount,user_id,currency,create_date,description):
         conn = await asyncpg.connect(user='postgres',password='31591',host='localhost',database='usersandother')
         tr = conn.transaction()
@@ -32,6 +36,7 @@ class DatabaseHolder():
         except Exception as e:
             await tr.rollback()
         await conn.close()
+        
     async def delete_expense(self,user_id,expense_number):
         conn = await asyncpg.connect(user='postgres',password='31591',host='localhost',database='usersandother')
         tr = conn.transaction()
@@ -42,11 +47,13 @@ class DatabaseHolder():
         except Exception as e:
             await tr.rollback()
         await conn.close()
+        
     async def get_user_expenses(self,user_id):
         conn = await asyncpg.connect(user='postgres',password='31591',host='localhost',database='usersandother')
         data = await conn.fetch('SELECT amount,description,create_date,number_of_expense FROM numberedspends where user_id = $1',user_id)
         await conn.close()
         return [tuple(record) for record in data]
+    
     async def delete_all_expenses(self,user_id):
         conn = await asyncpg.connect(user='postgres',password='31591',host='localhost',database='usersandother')
         tr = conn.transaction()
